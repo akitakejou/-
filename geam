@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="ja" class="h-full">
+ <head><script src="/_sdk/telemetry_sdk.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>News Digest</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&amp;family=DM+Sans:wght@400;500;700&amp;display=swap" rel="stylesheet">
+  <style>
+    .card-hover { transition: transform 0.2s, box-shadow 0.2s; }
+    .card-hover:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.12); }
+    .category-pill { transition: background 0.2s; }
+  </style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full">
+  <div id="app" class="h-full w-full overflow-auto" style="background:#f8f6f2; font-family:'DM Sans',sans-serif;"><!-- Header -->
+   <header style="background:#1a1a2e; color:#eaeaea;" class="px-6 py-8 text-center">
+    <h1 id="site-title" class="text-3xl md:text-4xl font-bold mb-2" style="font-family:'Noto Serif JP',serif; color:#f0c040;">今日のニュースダイジェスト</h1>
+    <p id="tagline" class="text-sm opacity-80">厳選された最新ニュースをお届けします</p>
+   </header><!-- Category Filter -->
+   <nav class="flex gap-2 px-6 py-4 flex-wrap justify-center" style="background:#1a1a2e;"><button class="category-pill px-4 py-1.5 rounded-full text-sm font-medium" style="background:#f0c040; color:#1a1a2e;" data-cat="all">すべて</button> <button class="category-pill px-4 py-1.5 rounded-full text-sm font-medium" style="background:#2a2a4a; color:#eaeaea;" data-cat="tech">テクノロジー</button> <button class="category-pill px-4 py-1.5 rounded-full text-sm font-medium" style="background:#2a2a4a; color:#eaeaea;" data-cat="business">ビジネス</button> <button class="category-pill px-4 py-1.5 rounded-full text-sm font-medium" style="background:#2a2a4a; color:#eaeaea;" data-cat="culture">カルチャー</button> <button class="category-pill px-4 py-1.5 rounded-full text-sm font-medium" style="background:#2a2a4a; color:#eaeaea;" data-cat="science">サイエンス</button>
+   </nav><!-- Articles Grid -->
+   <main class="max-w-6xl mx-auto px-6 py-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3" id="articles-grid">
+   </main>
+  </div>
+  <script>
+const articles = [
+  { id:1, cat:"tech", title:"AIが変える働き方の未来", summary:"生成AIの急速な普及により、多くの企業が業務フローを再設計。効率化と創造性の両立が鍵に。", date:"2025-01-15", read:"5分" },
+  { id:2, cat:"business", title:"円安が続く中、輸出企業に追い風", summary:"為替市場の動向を受け、自動車・電子部品メーカーの業績が好調。一方で輸入コスト増の懸念も。", date:"2025-01-15", read:"3分" },
+  { id:3, cat:"culture", title:"新世代アーティストが世界を席巻", summary:"日本発のデジタルアートが海外オークションで高値を記録。文化輸出の新たな形として注目。", date:"2025-01-14", read:"4分" },
+  { id:4, cat:"science", title:"量子コンピュータの実用化に前進", summary:"国内研究チームが量子エラー訂正の新手法を発表。商用化への道筋がより明確に。", date:"2025-01-14", read:"6分" },
+  { id:5, cat:"tech", title:"次世代半導体の製造拠点が国内に", summary:"政府の支援策を受け、大手メーカーが新工場建設を発表。サプライチェーン強化へ。", date:"2025-01-13", read:"4分" },
+  { id:6, cat:"business", title:"サステナブル投資が過去最高に", summary:"ESG関連ファンドへの資金流入が加速。投資家の意識変化が市場を動かす。", date:"2025-01-13", read:"3分" },
+];
+
+const catColors = { tech:"#6c63ff", business:"#ff6b6b", culture:"#ffa94d", science:"#51cf66" };
+const catLabels = { tech:"芸能ニュース", business:"SNS話題", culture:"TikTok", science:"過去記事からの話題" };
+
+let currentCat = "all";
+
+function renderArticles() {
+  const grid = document.getElementById('articles-grid');
+  const filtered = currentCat === "all" ? articles : articles.filter(a => a.cat === currentCat);
+  grid.innerHTML = filtered.map(a => `
+    <article class="card-hover rounded-xl p-5 cursor-pointer" style="background:#fff; border-left:4px solid ${catColors[a.cat]};">
+      <span class="inline-block text-xs font-medium px-2 py-0.5 rounded-full mb-3" style="background:${catColors[a.cat]}20; color:${catColors[a.cat]};">${catLabels[a.cat]}</span>
+      <h2 class="text-lg font-bold mb-2" style="color:#1a1a2e; font-family:'Noto Serif JP',serif;">${a.title}</h2>
+      <p class="text-sm mb-3" style="color:#555;">${a.summary}</p>
+      <div class="flex items-center gap-3 text-xs" style="color:#999;">
+        <span><i data-lucide="calendar" style="width:12px;height:12px;display:inline;vertical-align:middle;"></i> ${a.date}</span>
+        <span><i data-lucide="clock" style="width:12px;height:12px;display:inline;vertical-align:middle;"></i> ${a.read}</span>
+      </div>
+    </article>
+  `).join('');
+  lucide.createIcons();
+}
+
+document.querySelectorAll('[data-cat]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    currentCat = btn.dataset.cat;
+    document.querySelectorAll('[data-cat]').forEach(b => {
+      b.style.background = b.dataset.cat === currentCat ? '#f0c040' : '#2a2a4a';
+      b.style.color = b.dataset.cat === currentCat ? '#1a1a2e' : '#eaeaea';
+    });
+    renderArticles();
+  });
+});
+
+renderArticles();
+
+// Element SDK
+const defaultConfig = {
+  site_title: "今日のニュースダイジェスト",
+  tagline: "厳選された最新ニュースをお届けします",
+  background_color: "#f8f6f2",
+  header_color: "#1a1a2e",
+  accent_color: "#f0c040",
+  text_color: "#1a1a2e",
+  card_color: "#ffffff",
+  font_family: "Noto Serif JP",
+  font_size: 16
+};
+
+window.elementSdk.init({
+  defaultConfig,
+  onConfigChange: async (config) => {
+    document.getElementById('site-title').textContent = config.site_title || defaultConfig.site_title;
+    document.getElementById('tagline').textContent = config.tagline || defaultConfig.tagline;
+    const bg = config.background_color || defaultConfig.background_color;
+    const hdr = config.header_color || defaultConfig.header_color;
+    const accent = config.accent_color || defaultConfig.accent_color;
+    const txt = config.text_color || defaultConfig.text_color;
+    const card = config.card_color || defaultConfig.card_color;
+    const font = config.font_family || defaultConfig.font_family;
+    const size = config.font_size || defaultConfig.font_size;
+    document.getElementById('app').style.background = bg;
+    document.querySelector('header').style.background = hdr;
+    document.querySelector('nav').style.background = hdr;
+    document.getElementById('site-title').style.color = accent;
+    document.getElementById('site-title').style.fontFamily = `${font}, serif`;
+    document.getElementById('site-title').style.fontSize = `${size * 2}px`;
+    document.getElementById('tagline').style.fontSize = `${size * 0.85}px`;
+    document.querySelectorAll('article h2').forEach(el => {
+      el.style.color = txt;
+      el.style.fontFamily = `${font}, serif`;
+      el.style.fontSize = `${size * 1.15}px`;
+    });
+    document.querySelectorAll('article').forEach(el => el.style.background = card);
+  },
+  mapToCapabilities: (config) => ({
+    recolorables: [
+      { get: () => config.background_color || defaultConfig.background_color, set: (v) => { config.background_color = v; window.elementSdk.setConfig({ background_color: v }); } },
+      { get: () => config.card_color || defaultConfig.card_color, set: (v) => { config.card_color = v; window.elementSdk.setConfig({ card_color: v }); } },
+      { get: () => config.text_color || defaultConfig.text_color, set: (v) => { config.text_color = v; window.elementSdk.setConfig({ text_color: v }); } },
+      { get: () => config.accent_color || defaultConfig.accent_color, set: (v) => { config.accent_color = v; window.elementSdk.setConfig({ accent_color: v }); } },
+      { get: () => config.header_color || defaultConfig.header_color, set: (v) => { config.header_color = v; window.elementSdk.setConfig({ header_color: v }); } },
+    ],
+    borderables: [],
+    fontEditable: { get: () => config.font_family || defaultConfig.font_family, set: (v) => { config.font_family = v; window.elementSdk.setConfig({ font_family: v }); } },
+    fontSizeable: { get: () => config.font_size || defaultConfig.font_size, set: (v) => { config.font_size = v; window.elementSdk.setConfig({ font_size: v }); } },
+  }),
+  mapToEditPanelValues: (config) => new Map([
+    ["site_title", config.site_title || defaultConfig.site_title],
+    ["tagline", config.tagline || defaultConfig.tagline],
+  ])
+});
+</script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a0a6f488e4d0e372',t:'MTc4MTI0NzM4Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
