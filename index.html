@@ -1,17 +1,140 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
+<!doctype html>
+<html lang="ja" class="h-full">
+ <head><script src="/_sdk/telemetry_sdk.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
-</head>
-<body>
-  <header>
-    <h1><img src="ChatGPT Image 2026年6月15日 15_57_52.png" width="300" height="70" alt="TREND SCOPE"</h1>
-    <nav>
-      <li></li>
-      <li></li>
-    </nav>
-  </header>
-</body>
+  <title>News Digest</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&amp;family=DM+Sans:wght@400;500;700&amp;display=swap" rel="stylesheet">
+  <style>
+    .card-hover { transition: transform 0.2s, box-shadow 0.2s; }
+    .card-hover:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.12); }
+    .category-pill { transition: background 0.2s; }
+  </style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full">
+  <div id="app" class="h-full w-full overflow-auto" style="background:#f8f6f2; font-family:'DM Sans',sans-serif;">
+   <!-- Header -->
+   <header style="background:#1a1a2e; color:#eaeaea;" class="px-6 py-8 text-center">
+    <h1 id="site-title" class="text-3xl md:text-4xl font-bold mb-2" style="font-family:'Noto Serif JP',serif; color:#f0c040;">SNSトレンドダイジェスト</h1>
+    <p id="tagline" class="text-sm opacity-80">TikTok・YouTube・X・SNSで話題の最新トレンド</p>
+   </header><!-- Category Filter -->
+   <nav class="flex gap-2 px-6 py-4 flex-wrap justify-center" style="background:#1a1a2e;">
+    <button class="category-pill px-4 py-1.5 rounded-full text-sm font-medium" style="background:#f0c040; color:#1a1a2e;" data-cat="all">すべて</button> <button class="category-pill px-4 py-1.5 rounded-full text-sm font-medium" style="background:#2a2a4a; color:#eaeaea;" data-cat="tiktok">TikTok</button> <button class="category-pill px-4 py-1.5 rounded-full text-sm font-medium" style="background:#2a2a4a; color:#eaeaea;" data-cat="youtube">YouTube</button> <button class="category-pill px-4 py-1.5 rounded-full text-sm font-medium" style="background:#2a2a4a; color:#eaeaea;" data-cat="sns">SNS全般</button> <button class="category-pill px-4 py-1.5 rounded-full text-sm font-medium" style="background:#2a2a4a; color:#eaeaea;" data-cat="x">X（旧Twitter）</button>
+   </nav><!-- Articles Grid -->
+   <main class="max-w-6xl mx-auto px-6 py-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3" id="articles-grid">
+   </main>
+  </div>
+  <script>
+const articles = [
+  { id:1, cat:"tiktok", title:"あの子誰？ダンスチャレンジが大流行", summary:"TikTokで1週間で500万再生を突破。若者を中心に話題沸騰中のダンス動画。", date:"2025-01-15", source:"TikTok Trends", url:"https://www.tiktok.com/" },
+  { id:2, cat:"youtube", title:"MrBeastが日本で新企画を展開", summary:"YouTubeの急上昇に毎日ランクイン。ギブアウェイ企画が再び話題に。", date:"2025-01-15", source:"YouTube Trending", url:"https://www.youtube.com/feed/trending" },
+  { id:3, cat:"sns", title:"Instagram Reelsで美容系クリエイターが急増", summary:"TikTok規制の影響でInstagramへの流入増加。新しいトレンドが次々と生まれている。", date:"2025-01-14", source:"Instagram Stories", url:"https://www.instagram.com/" },
+  { id:4, cat:"x", title:"あのニュースがXでトレンド1位に", summary:"X上で朝から夕方まで話題独占。リツイート数が130万超え。", date:"2025-01-14", source:"X Trends", url:"https://x.com/explore/tabs/what_happening" },
+  { id:5, cat:"tiktok", title:"3秒で完成するメイクテク", summary:"時短メイク動画がTikTokで急拡散。メイク初心者にも優しいと評判。", date:"2025-01-13", source:"TikTok Creator", url:"https://www.tiktok.com/" },
+  { id:6, cat:"youtube", title:"Vlogger最新作が初日100万再生達成", summary:"YouTubeの急上昇ランキング常連クリエイターの新作。期待を上回る反響。", date:"2025-01-13", source:"YouTube News", url:"https://www.youtube.com/feed/trending" },
+  { id:7, cat:"sns", title:"SNS全体で話題の新しいオタ活文化", summary:"複数のSNSプラットフォームで同時トレンド。若い世代の新しい推し活スタイル。", date:"2025-01-13", source:"SNS News", url:"https://www.instagram.com/" },
+  { id:8, cat:"x", title:"政治ネタがXで大バズ", summary:"シャープなコメント返信が話題に。リプ欄が盛り上がりを見せている。", date:"2025-01-12", source:"X News", url:"https://x.com/explore/tabs/what_happening" },
+];
+
+const catColors = { tiktok:"#ee1d52", youtube:"#ff0000", sns:"#1f6feb", x:"#000000" };
+const catLabels = { tiktok:"TikTok", youtube:"YouTube", sns:"SNS全般", x:"X（旧Twitter）" };
+
+let currentCat = "all";
+
+function renderArticles() {
+  const grid = document.getElementById('articles-grid');
+  const filtered = currentCat === "all" ? articles : articles.filter(a => a.cat === currentCat);
+  grid.innerHTML = filtered.map(a => `
+    <article class="card-hover rounded-xl p-5 overflow-hidden" style="background:#fff; border-left:4px solid ${catColors[a.cat]};">
+      <span class="inline-block text-xs font-medium px-2 py-0.5 rounded-full mb-3" style="background:${catColors[a.cat]}20; color:${catColors[a.cat]};">${catLabels[a.cat]}</span>
+      <h2 class="text-lg font-bold mb-2" style="color:#1a1a2e; font-family:'Noto Serif JP',serif;">${a.title}</h2>
+      <p class="text-sm mb-3" style="color:#555;">${a.summary}</p>
+      <div class="flex items-center gap-3 text-xs mb-4" style="color:#999;">
+        <span><i data-lucide="calendar" style="width:12px;height:12px;display:inline;vertical-align:middle;"></i> ${a.date}</span>
+      </div>
+      <a href="${a.url}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium" style="background:${catColors[a.cat]}; color:#fff; transition:opacity 0.2s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+        詳しく見る
+        <i data-lucide="external-link" style="width:14px;height:14px;"></i>
+      </a>
+    </article>
+  `).join('');
+  lucide.createIcons();
+}
+
+document.querySelectorAll('[data-cat]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    currentCat = btn.dataset.cat;
+    document.querySelectorAll('[data-cat]').forEach(b => {
+      b.style.background = b.dataset.cat === currentCat ? '#f0c040' : '#2a2a4a';
+      b.style.color = b.dataset.cat === currentCat ? '#1a1a2e' : '#eaeaea';
+    });
+    renderArticles();
+  });
+});
+
+renderArticles();
+
+// Element SDK
+const defaultConfig = {
+  site_title: "SNSトレンドダイジェスト",
+  tagline: "TikTok・YouTube・X・SNSで話題の最新トレンド",
+  background_color: "#f8f6f2",
+  header_color: "#1a1a2e",
+  accent_color: "#f0c040",
+  text_color: "#1a1a2e",
+  card_color: "#ffffff",
+  font_family: "Noto Serif JP",
+  font_size: 16
+};
+
+window.elementSdk.init({
+  defaultConfig,
+  onConfigChange: async (config) => {
+    document.getElementById('site-title').textContent = config.site_title || defaultConfig.site_title;
+    document.getElementById('tagline').textContent = config.tagline || defaultConfig.tagline;
+    const bg = config.background_color || defaultConfig.background_color;
+    const hdr = config.header_color || defaultConfig.header_color;
+    const accent = config.accent_color || defaultConfig.accent_color;
+    const txt = config.text_color || defaultConfig.text_color;
+    const card = config.card_color || defaultConfig.card_color;
+    const font = config.font_family || defaultConfig.font_family;
+    const size = config.font_size || defaultConfig.font_size;
+    document.getElementById('app').style.background = bg;
+    document.querySelector('header').style.background = hdr;
+    document.querySelector('nav').style.background = hdr;
+    document.getElementById('site-title').style.color = accent;
+    document.getElementById('site-title').style.fontFamily = `${font}, serif`;
+    document.getElementById('site-title').style.fontSize = `${size * 2}px`;
+    document.getElementById('tagline').style.fontSize = `${size * 0.85}px`;
+    document.querySelectorAll('article h2').forEach(el => {
+      el.style.color = txt;
+      el.style.fontFamily = `${font}, serif`;
+      el.style.fontSize = `${size * 1.15}px`;
+    });
+    document.querySelectorAll('article').forEach(el => el.style.background = card);
+  },
+  mapToCapabilities: (config) => ({
+    recolorables: [
+      { get: () => config.background_color || defaultConfig.background_color, set: (v) => { config.background_color = v; window.elementSdk.setConfig({ background_color: v }); } },
+      { get: () => config.card_color || defaultConfig.card_color, set: (v) => { config.card_color = v; window.elementSdk.setConfig({ card_color: v }); } },
+      { get: () => config.text_color || defaultConfig.text_color, set: (v) => { config.text_color = v; window.elementSdk.setConfig({ text_color: v }); } },
+      { get: () => config.accent_color || defaultConfig.accent_color, set: (v) => { config.accent_color = v; window.elementSdk.setConfig({ accent_color: v }); } },
+      { get: () => config.header_color || defaultConfig.header_color, set: (v) => { config.header_color = v; window.elementSdk.setConfig({ header_color: v }); } },
+    ],
+    borderables: [],
+    fontEditable: { get: () => config.font_family || defaultConfig.font_family, set: (v) => { config.font_family = v; window.elementSdk.setConfig({ font_family: v }); } },
+    fontSizeable: { get: () => config.font_size || defaultConfig.font_size, set: (v) => { config.font_size = v; window.elementSdk.setConfig({ font_size: v }); } },
+  }),
+  mapToEditPanelValues: (config) => new Map([
+    ["site_title", config.site_title || defaultConfig.site_title],
+    ["tagline", config.tagline || defaultConfig.tagline],
+  ])
+});
+</script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a0c654f1c37ab603',t:'MTc4MTU3NjM4OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
